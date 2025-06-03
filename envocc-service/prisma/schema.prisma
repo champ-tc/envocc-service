@@ -1,0 +1,263 @@
+generator client {
+    provider = "prisma-client-js"
+}
+
+datasource db {
+    provider = "postgresql"
+    url      = env("DATABASE_URL")
+}
+
+model User {
+    id         String   @id @default(uuid())
+    username   String   @unique
+    prefix     String
+    thaiName   String
+    engName    String
+    email      String   @unique
+    phone      String
+    lineId     String
+    avatarUrl  String?
+    groupId    String
+    positionId String
+    password   String
+    role       Role     @default(USER)
+    status     Status   @default(PENDING)
+    createdAt  DateTime @default(now())
+
+    group              Group                   @relation(fields: [groupId], references: [id])
+    position           Position                @relation(fields: [positionId], references: [id])
+    roomBookings       RoomBooking[]
+    conferenceRequests ConferenceRequest[]
+    pcIssues           PcIssueRequest[]
+    videoRequests      VideoRequest[]
+    webContents        WebContentRequest[]
+    internetRequests   InternetRequest[]
+    nasRequests        NasRequest[]
+    nasIssues          NasIssueRequest[]
+    resetPasswords     ResetPasswordRequest[]
+    itSupports         ItSupportRequest[]
+    infoFixes          InformationFixRequest[]
+    serverRequests     ServerRequest[]
+    requestLogs        RequestLog[]
+}
+
+model Group {
+    id    String @id @default(uuid())
+    name  String @unique
+    users User[]
+}
+
+model Position {
+    id    String @id @default(uuid())
+    name  String @unique
+    users User[]
+}
+
+enum Role {
+    ADMINISTRATOR
+    ADMIN
+    USER
+}
+
+enum Status {
+    PENDING
+    ACTIVE
+    INACTIVE
+}
+
+model Room {
+    id           String        @id @default(uuid())
+    name         String
+    description  String
+    imageUrl     String
+    capacity     Int
+    hasEquipment Boolean
+    bookings     RoomBooking[]
+}
+
+model RoomBooking {
+    id            String   @id @default(uuid())
+    userId        String
+    roomId        String
+    meetingTitle  String
+    meetingChair  String
+    attendees     Int
+    dateStart     DateTime
+    dateEnd       DateTime
+    startTime     String
+    endTime       String
+    note          String?
+    needEquipment Boolean
+
+    user User @relation(fields: [userId], references: [id])
+    room Room @relation(fields: [roomId], references: [id])
+}
+
+model ConferenceRequest {
+    id            String   @id @default(uuid())
+    userId        String
+    role          String
+    platform      String
+    topic         String
+    dateRange     String
+    startTime     String
+    endTime       String
+    duration      String
+    room          String
+    otherRoom     String?
+    needEquipment String?
+    note          String?
+    createdAt     DateTime @default(now())
+
+    user User @relation(fields: [userId], references: [id])
+}
+
+model PcIssueRequest {
+    id         String   @id @default(uuid())
+    userId     String
+    deviceType String
+    issueType  String
+    problem    String
+    createdAt  DateTime @default(now())
+
+    user User @relation(fields: [userId], references: [id])
+}
+
+model VideoRequest {
+    id        String   @id @default(uuid())
+    userId    String
+    topic     String
+    date      DateTime
+    note      String?
+    createdAt DateTime @default(now())
+
+    user User @relation(fields: [userId], references: [id])
+}
+
+model WebContentRequest {
+    id        String   @id @default(uuid())
+    userId    String
+    headline  String
+    link      String
+    fileLink  String
+    note      String?
+    createdAt DateTime @default(now())
+
+    user User @relation(fields: [userId], references: [id])
+}
+
+model InternetRequest {
+    id        String   @id @default(uuid())
+    userId    String
+    createdAt DateTime @default(now())
+
+    user User @relation(fields: [userId], references: [id])
+}
+
+model NasRequest {
+    id        String   @id @default(uuid())
+    userId    String
+    createdAt DateTime @default(now())
+
+    user User @relation(fields: [userId], references: [id])
+}
+
+model NasIssueRequest {
+    id        String   @id @default(uuid())
+    userId    String
+    problem   String
+    note      String?
+    createdAt DateTime @default(now())
+
+    user User @relation(fields: [userId], references: [id])
+}
+
+model ResetPasswordRequest {
+    id        String   @id @default(uuid())
+    userId    String
+    username  String
+    note      String?
+    createdAt DateTime @default(now())
+
+    user User @relation(fields: [userId], references: [id])
+}
+
+model ItSupportRequest {
+    id          String   @id @default(uuid())
+    userId      String
+    supportType String
+    meetingName String
+    dateRange   String
+    time        String
+    note        String?
+    createdAt   DateTime @default(now())
+
+    user User @relation(fields: [userId], references: [id])
+}
+
+model InformationFixRequest {
+    id         String   @id @default(uuid())
+    userId     String
+    systemName String
+    systemLink String
+    details    String
+    imageLink  String
+    note       String?
+    createdAt  DateTime @default(now())
+
+    user User @relation(fields: [userId], references: [id])
+}
+
+model ServerRequest {
+    id                String   @id @default(uuid())
+    userId            String
+    topic             String
+    description       String
+    department        String
+    ownerName         String
+    mobile            String
+    email             String
+    systemThai        String
+    systemEnglish     String
+    purpose           String
+    serverType        String
+    appPlatform       String
+    domain            String
+    adminUsername     String
+    adminPassword     String
+    userUsername      String
+    userPassword      String
+    systemType        String
+    systemSource      String
+    vendorOwner       String?
+    vendorCompany     String?
+    vendorContact     String?
+    vendorPhone       String?
+    vendorEmail       String?
+    frontendFramework String
+    frontendLanguage  String
+    backendFramework  String
+    backendLanguage   String
+    database          String
+    webServer         String
+    os                String
+    cpu               String
+    ram               String
+    storage           String
+    openPorts         String
+    note              String?
+    createdAt         DateTime @default(now())
+
+    user User @relation(fields: [userId], references: [id])
+}
+
+model RequestLog {
+    id          String   @id @default(uuid())
+    userId      String
+    type        String
+    referenceId String
+    status      String   @default("กำลังดำเนินการ")
+    createdAt   DateTime @default(now())
+
+    user User @relation(fields: [userId], references: [id])
+}
